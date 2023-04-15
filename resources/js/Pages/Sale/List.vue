@@ -1,9 +1,15 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SuccessButton from '@/Components/SuccessButton.vue';
-import DangerButton from '@/Components/DangerButton.vue';
+import Modal from '@/Components/Modal.vue';
 import helper from '@/Utils/helper.js';
 import { Head, Link } from '@inertiajs/vue3';
+import { reactive } from 'vue';
+
+const state = reactive({
+    trxDetail: null,
+    modalDetail: false
+});
 
 defineProps({
     transactions: {
@@ -20,10 +26,15 @@ defineProps({
     },
 });
 
+function showDetail(trx) {
+    state.trxDetail = trx;
+    state.modalDetail = true
+}
+
 </script>
 
 <template>
-    <Head title="Produk" />
+    <Head title="Penjualan" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -83,13 +94,10 @@ defineProps({
                                                     <th scope="col" class="py-3 px-6 text-lg font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400">
                                                         Total
                                                     </th>
-                                                    <th scope="col" class="p-4">
-                                                        <span class="sr-only">Action</span>
-                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                                                <tr v-for="(transaction, index) in transactions" :key="index" class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                <tr v-for="(transaction, index) in transactions" :key="index" class="hover:bg-gray-100 dark:hover:bg-gray-700" @click="showDetail(transaction)">
                                                     <td class="py-4 px-6 text-lg font-medium text-gray-500 whitespace-nowrap dark:text-white">
                                                         {{ helper.formatDateTime(transaction.transaction_date) }}
                                                     </td>
@@ -105,9 +113,6 @@ defineProps({
                                                     <td class="py-4 px-6 text-lg font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                                         Rp. {{ helper.formatRupiah(transaction.total) }}
                                                     </td>
-                                                    <td class="py-4 px-6 text-lg font-medium text-right whitespace-nowrap">
-                                                        <!-- <Link :href="route('product.edit', {'id': product.id})" class="text-blue-600 dark:text-blue-500 hover:underline">Edit</Link> -->
-                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -119,5 +124,48 @@ defineProps({
                 </div>
             </div>
         </div>
+
+        <Modal :show="state.modalDetail" @close="state.modalDetail = false">
+            <div class="p-6">
+                <h2 class="mb-3 text-lg font-medium text-gray-900">
+                    Detail Data Penjualan
+                </h2>
+
+                <p class="mb-2 text-lg text-gray-600">
+                    <b>Tanggal</b>: {{ helper.formatDateTime(state.trxDetail.transaction_date) }}
+                </p>
+
+                <p class="mb-2 text-lg text-gray-600">
+                    <b>Produk</b>: {{ state.trxDetail.ref['name'] }}
+                </p>
+
+                <p class="mb-2 text-lg text-gray-600">
+                    <b>Harga</b>: {{ helper.formatRupiah(state.trxDetail.price) }} / {{ state.trxDetail.ref['unit'] }}
+                </p>
+
+                <p class="mb-2 text-lg text-gray-600">
+                    <b>Kuantiti</b>: {{ helper.formatRupiah(state.trxDetail.quantity) }} {{ state.trxDetail.ref['unit'] }}
+                </p>
+
+                <p class="mb-2 text-lg text-gray-600">
+                    <b>Total Harga</b>: {{ helper.formatRupiah(state.trxDetail.total) }}
+                </p>
+
+                <div class="mb-2 text-lg text-gray-600" v-if="state.trxDetail.notes">
+                    <b>Catatan</b>:
+                    <p v-html="state.trxDetail.notes"></p>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <SecondaryButton @click="state.modalDetail = false"> Tutup </SecondaryButton>
+                </div>
+            </div>
+        </Modal>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+tr:hover {
+    cursor: pointer;
+}
+</style>
