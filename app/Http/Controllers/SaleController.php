@@ -9,7 +9,7 @@ use Inertia\Inertia;
 use Carbon\Carbon;
 use Inertia\Response;
 use App\Models\Product;
-use App\Models\Transaction;
+use App\Models\Sale;
 
 class SaleController extends Controller
 {
@@ -23,7 +23,7 @@ class SaleController extends Controller
             ->get();
 
         return Inertia::render('Sale/List', [
-            'transactions' => Transaction::where('type', 1)->orderBy('transaction_date', 'desc')->get(),
+            'transactions' => Sale::orderBy('sale_date', 'desc')->get(),
             'products' => $products,
             'success' => session('success'),
             'error' => session('error'),
@@ -63,15 +63,13 @@ class SaleController extends Controller
 
         $product = Product::findOrFail($request->post('product_id'));
 
-        $sales = Transaction::create([
+        $sales = Sale::create([
             'user_id' => $request->user()->id,
-            'transaction_date' => Carbon::createFromFormat('Y-m-d H:i:s', $request->post('date'))->toDateTimeString(),
-            'type' => 1,
+            'sale_date' => Carbon::createFromFormat('Y-m-d H:i:s', $request->post('date'))->toDateTimeString(),
             'product_id' => $request->post('product_id'),
             'price' => $product->price,
             'quantity' => $request->post('quantity'),
             'notes' => $request->post('notes'),
-            'total' => $product->price * intval($request->post('quantity')),
             'ref' => $product
         ]);
 

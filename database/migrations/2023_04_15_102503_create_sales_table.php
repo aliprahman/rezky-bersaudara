@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->integer('type')->comment('1 = sale, 2 = purcahse');
-            $table->datetime('transaction_date');
+            $table->datetime('sale_date');
             $table->string('code')->nullable();
             $table->integer('product_id');
             $table->integer('price');
             $table->integer('quantity');
-            $table->integer('total');
+            $table->bigInteger('total')->nullable();
             $table->text('notes')->nullable();
             $table->integer('user_id');
             $table->json('ref')->nullable();
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('sales');
     }
 };
